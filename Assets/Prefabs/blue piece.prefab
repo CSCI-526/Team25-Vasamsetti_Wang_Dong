@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 8799368152033557375}
   - component: {fileID: -726929184856102281}
   - component: {fileID: -1075817594213816247}
+  - component: {fileID: 773222320102687619}
+  - component: {fileID: 5808345099776350279}
   m_Layer: 0
   m_Name: blue piece
   m_TagString: Untagged
@@ -308,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30501f163e18b3b47b0403373b0cb323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceStats
-  maxHealth: 20
+  baseHealth: 20
   baseAttackPower: 4
   currentHealth: 20
   currentAttackPower: 4
@@ -339,8 +341,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47d109ed43c35c41b13bd29a46993f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceCombat
-  damageCooldown: 0.01
-  minimumDamageSpeed: 0.25
+  damageCooldown: 0.1
+  minimumDamageSpeed: 0.05
 --- !u!114 &-726929184856102281
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,6 +371,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d002583793e429d46b56b7fafa46c871, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceAllyAbilityCollision
+--- !u!114 &773222320102687619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5679361070880685025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdabbc3f971ee5d499ae00e65f28814d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefensiveCounterAbility
+--- !u!114 &5808345099776350279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5679361070880685025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d021f5f145e72d4cb0a51b5e988135d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ExtraActionOnKillAbility
 --- !u!1 &8164778494319716699
 GameObject:
   m_ObjectHideFlags: 0

@@ -23,8 +23,10 @@ public class TurnManager : MonoBehaviour
 
     // 为“首次击杀额外行动”技能提前准备
     private bool extraActionPending;
-
+    // 每次正式切换队伍时增加，用来区分不同回合
+    private int turnSequence = 1;
     public PieceTeamSide CurrentTeam => currentTeam;
+    public int TurnSequence => turnSequence;
 
     private void Awake()
     {
@@ -100,9 +102,16 @@ public class TurnManager : MonoBehaviour
             currentTeam = PieceTeamSide.Blue;
         }
 
+        // 只有正式切换队伍才算进入新回合
+        // 额外行动不会增加这个编号
+        turnSequence++;
+
         ApplyCurrentTurn();
 
-        Debug.Log($"Current turn: {currentTeam}");
+        Debug.Log(
+            $"Current turn: {currentTeam}, " +
+            $"turn sequence: {turnSequence}"
+        );
     }
 
     private void ApplyCurrentTurn()

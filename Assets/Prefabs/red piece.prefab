@@ -202,6 +202,8 @@ GameObject:
   - component: {fileID: 824170537042948658}
   - component: {fileID: 6252261029024274895}
   - component: {fileID: 7750802811939229313}
+  - component: {fileID: 1199908855861680119}
+  - component: {fileID: 12132554547145583}
   m_Layer: 0
   m_Name: red piece
   m_TagString: Untagged
@@ -491,7 +493,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30501f163e18b3b47b0403373b0cb323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceStats
-  maxHealth: 20
+  baseHealth: 20
   baseAttackPower: 4
   currentHealth: 20
   currentAttackPower: 4
@@ -522,8 +524,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c47d109ed43c35c41b13bd29a46993f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceCombat
-  damageCooldown: 0.01
-  minimumDamageSpeed: 0.25
+  damageCooldown: 0.1
+  minimumDamageSpeed: 0.05
 --- !u!114 &6252261029024274895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -552,3 +554,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d002583793e429d46b56b7fafa46c871, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceAllyAbilityCollision
+--- !u!114 &1199908855861680119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041306706797630330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdabbc3f971ee5d499ae00e65f28814d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DefensiveCounterAbility
+--- !u!114 &12132554547145583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041306706797630330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d021f5f145e72d4cb0a51b5e988135d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ExtraActionOnKillAbility

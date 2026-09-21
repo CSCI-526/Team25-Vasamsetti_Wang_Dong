@@ -40,11 +40,37 @@ public class PieceCombat : MonoBehaviour
         ProcessCollision(collision);
     }
 
+    private bool CanThisPieceDealDamage()
+    {
+        if (pieceStats == null)
+        {
+            return false;
+        }
+
+        // 有正式回合系统时：
+        // 当前行动队伍的所有棋子都可以造成普通碰撞伤害
+        if (TurnManager.Instance != null)
+        {
+            return TurnManager.Instance.IsTeamTurn(
+                pieceStats.Team
+            );
+        }
+
+        // 没有 TurnManager 时保留旧逻辑，
+        // 方便单独测试物理场景
+        if (launcher != null)
+        {
+            return launcher.CanDealDamageThisShot;
+        }
+
+        return false;
+    }
+
     private void ProcessCollision(
         Collision2D collision
     )
     {
-        if (!launcher.CanDealDamageThisShot)
+        if (!CanThisPieceDealDamage())
         {
             return;
         }

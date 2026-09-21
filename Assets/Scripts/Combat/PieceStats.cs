@@ -64,6 +64,11 @@ public class PieceStats : MonoBehaviour
 
     // 参数是击杀者
     public event Action<PieceStats> Died;
+    // 当前棋子完成击杀时触发
+    // 参数是被击杀的敌方棋子
+    public event Action<PieceStats> KilledEnemy;
+    public event Action<PieceStats, int> Damaged;
+
 
     private void Awake()
     {
@@ -91,6 +96,21 @@ public class PieceStats : MonoBehaviour
         ResetRuntimeStats();
     }
 
+    public void RegisterKill(PieceStats defeatedPiece)
+    {
+        if (defeatedPiece == null)
+        {
+            return;
+        }
+
+        if (defeatedPiece.Team == Team)
+        {
+            return;
+        }
+
+        KilledEnemy?.Invoke(defeatedPiece);
+    }
+
     public void TakeDamage(int damage, PieceStats attacker)
     {
         if (isDead || damage <= 0)
@@ -103,6 +123,9 @@ public class PieceStats : MonoBehaviour
 
         HealthChanged?.Invoke();
         StatsChanged?.Invoke();
+
+        // 通知技能系统：这枚棋子确实受到了伤害
+        Damaged?.Invoke(attacker, damage);
 
         Debug.Log(
             $"{name} took {damage} damage. " +
@@ -164,8 +187,14 @@ public class PieceStats : MonoBehaviour
             $"{(attacker != null ? attacker.name : "unknown")}"
         );
 
-        // 立即通知计分和技能系统
+        // 通知计分系统：当前棋子被击杀
         Died?.Invoke(attacker);
+
+        // 通知攻击者：它完成了一次击杀
+        if (attacker != null)
+        {
+            attacker.RegisterKill(this);
+        }
 
         // 关闭死亡棋子的物理和画面
         EnterDefeatedState();
