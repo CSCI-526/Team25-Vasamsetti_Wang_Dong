@@ -42,6 +42,7 @@ public class PieceLauncher : MonoBehaviour
     public bool ControlEnabled => controlEnabled;
     public bool IsActiveAttacker { get; private set; }
     public bool CanDealDamageThisShot { get; private set; }
+    
 
 
     private void Awake()

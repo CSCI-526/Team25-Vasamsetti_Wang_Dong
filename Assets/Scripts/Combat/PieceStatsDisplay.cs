@@ -1,17 +1,27 @@
 using TMPro;
 using UnityEngine;
 
-[RequireComponent(typeof(PieceStats))]
 public class PieceStatsDisplay : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] private PieceStats stats;
     [SerializeField] private TMP_Text statsText;
-
-    private PieceStats stats;
 
     private void Awake()
     {
-        stats = GetComponent<PieceStats>();
+        // 如果没有手动拖入 PieceStats，就自动寻找
+        if (stats == null)
+        {
+            stats = GetComponentInParent<PieceStats>();
+        }
 
+        // 如果脚本和文字组件在同一个物体上，就从自身寻找
+        if (statsText == null)
+        {
+            statsText = GetComponent<TMP_Text>();
+        }
+
+        // 如果脚本放在棋子根物体上，就从子物体中寻找文字
         if (statsText == null)
         {
             statsText = GetComponentInChildren<TMP_Text>(true);
@@ -20,17 +30,15 @@ public class PieceStatsDisplay : MonoBehaviour
 
     private void OnEnable()
     {
-        if (stats == null)
+        if (stats != null)
         {
-            stats = GetComponent<PieceStats>();
+            stats.StatsChanged += HandleStatsChanged;
         }
-
-        stats.StatsChanged += HandleStatsChanged;
     }
 
     private void Start()
     {
-        RefreshDisplay();
+        HandleStatsChanged();
     }
 
     private void OnDisable()
@@ -41,30 +49,15 @@ public class PieceStatsDisplay : MonoBehaviour
         }
     }
 
-    private void HandleStatsChanged(
-        PieceStats changedStats
-    )
+    private void HandleStatsChanged()
     {
-        RefreshDisplay();
-    }
-
-    private void RefreshDisplay()
-    {
-        if (statsText == null)
+        if (stats == null || statsText == null)
         {
-            Debug.LogError(
-                "Stats Text is missing on " +
-                gameObject.name,
-                this
-            );
-
             return;
         }
 
         statsText.text =
-    "HP " +
-    stats.CurrentHealth +
-    "\nATK " +
-    stats.AttackPower;
+            $"HP {stats.CurrentHealth}\n" +
+            $"ATK {stats.AttackPower}";
     }
 }

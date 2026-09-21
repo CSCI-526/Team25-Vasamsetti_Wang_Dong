@@ -200,6 +200,8 @@ GameObject:
   - component: {fileID: 1476669847587361489}
   - component: {fileID: 6809113090850781865}
   - component: {fileID: 824170537042948658}
+  - component: {fileID: 6252261029024274895}
+  - component: {fileID: 7750802811939229313}
   m_Layer: 0
   m_Name: red piece
   m_TagString: Untagged
@@ -467,7 +469,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b8e93f32e4b232499239eb09e1b83ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceLauncher
-  launchForce: 15
+  launchForce: 20
   maxDragDistance: 3
   minimumDragDistance: 0.1
   team: 1
@@ -490,8 +492,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceStats
   maxHealth: 20
-  attackPower: 4
+  baseAttackPower: 4
   currentHealth: 20
+  currentAttackPower: 4
   isDead: 0
 --- !u!114 &6809113090850781865
 MonoBehaviour:
@@ -505,6 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f3e7af8719e53147a7295c580d417bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsDisplay
+  stats: {fileID: 0}
   statsText: {fileID: 634875109888383786}
 --- !u!114 &824170537042948658
 MonoBehaviour:
@@ -520,3 +524,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PieceCombat
   damageCooldown: 0.01
   minimumDamageSpeed: 0.25
+--- !u!114 &6252261029024274895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041306706797630330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e43f403a582c5f4ba0fdfbf8acc7f43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceAbility
+  abilityType: 0
+  attackBoostAmount: 1
+  healAmount: 2
+  counterDamage: 1
+--- !u!114 &7750802811939229313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041306706797630330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d002583793e429d46b56b7fafa46c871, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceAllyAbilityCollision
