@@ -62,11 +62,9 @@ public class PieceStatsDisplay : MonoBehaviour
         }
 
         statsText.text =
-            "HP " +
-            stats.CurrentHealth +
-            "/" +
-            stats.MaxHealth +
-            "\nATK " +
-            stats.AttackPower;
+    "HP " +
+    stats.CurrentHealth +
+    "\nATK " +
+    stats.AttackPower;
     }
 }

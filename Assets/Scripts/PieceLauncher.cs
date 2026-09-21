@@ -11,19 +11,24 @@ public class PieceLauncher : MonoBehaviour
     [SerializeField] private float minimumDragDistance = 0.1f;
 
     [Header("Selection Settings")]
-    [SerializeField] private PieceTeamSide team = PieceTeamSide.Blue;
-    [SerializeField] private bool controlEnabled = true;
-    [SerializeField] private float selectableSpeed = 0.1f;
+    [SerializeField]
+    private PieceTeamSide team =
+        PieceTeamSide.Blue;
 
-    public PieceTeamSide Team => team;
-    public bool ControlEnabled => controlEnabled;
-    public bool IsActiveAttacker { get; private set; }
+    [SerializeField] private bool controlEnabled = true;
+    [SerializeField] private float selectableSpeed = 0.15f;
 
     [Header("Aim Line Settings")]
     [SerializeField] private float lineStartWidth = 0.1f;
     [SerializeField] private float lineEndWidth = 0.04f;
-    [SerializeField] private Color lineStartColor = Color.white;
-    [SerializeField] private Color lineEndColor = Color.cyan;
+
+    [SerializeField]
+    private Color lineStartColor =
+        Color.white;
+
+    [SerializeField]
+    private Color lineEndColor =
+        Color.cyan;
 
     private Rigidbody2D rb;
     private Camera mainCamera;
@@ -33,13 +38,20 @@ public class PieceLauncher : MonoBehaviour
     private Vector2 dragStartPosition;
     private bool isDragging;
 
+    public PieceTeamSide Team => team;
+    public bool ControlEnabled => controlEnabled;
+    public bool IsActiveAttacker { get; private set; }
+    public bool CanDealDamageThisShot { get; private set; }
+
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         mainCamera = Camera.main;
         aimLine = GetComponent<LineRenderer>();
 
-        stopDetector = FindFirstObjectByType<PhysicsStopDetector>();
+        stopDetector =
+            FindFirstObjectByType<PhysicsStopDetector>();
 
         if (stopDetector == null)
         {
@@ -73,17 +85,14 @@ public class PieceLauncher : MonoBehaviour
     {
         if (!controlEnabled)
         {
-            Debug.Log(
-                gameObject.name + " cannot be selected during this turn."
-            );
-
             return;
         }
 
         if (stopDetector == null)
         {
             Debug.LogError(
-                "This piece cannot launch because PhysicsStopDetector is missing.",
+                "This piece cannot launch because " +
+                "PhysicsStopDetector is missing.",
                 this
             );
 
@@ -92,10 +101,6 @@ public class PieceLauncher : MonoBehaviour
 
         if (!stopDetector.AllPiecesStopped)
         {
-            Debug.Log(
-                gameObject.name + " cannot launch because another piece is moving."
-            );
-
             return;
         }
 
@@ -128,43 +133,56 @@ public class PieceLauncher : MonoBehaviour
             return;
         }
 
-        Vector2 currentMousePosition = GetMouseWorldPosition();
-        Vector2 launchVector = CalculateLaunchVector(currentMousePosition);
+        Vector2 currentMousePosition =
+            GetMouseWorldPosition();
+
+        Vector2 launchVector =
+            CalculateLaunchVector(currentMousePosition);
 
         isDragging = false;
         aimLine.enabled = false;
 
-        if (launchVector.magnitude >= minimumDragDistance)
+        if (launchVector.magnitude < minimumDragDistance)
         {
-            MarkAsActiveAttacker();
-
-            if (stopDetector != null)
-            {
-                stopDetector.NotifyShotLaunched();
-            }
-
-            rb.AddForce(
-                launchVector * launchForce,
-                ForceMode2D.Impulse
-            );
+            return;
         }
+
+        MarkAsActiveAttacker();
+
+        if (stopDetector != null)
+        {
+            stopDetector.NotifyShotLaunched();
+        }
+
+        rb.AddForce(
+            launchVector * launchForce,
+            ForceMode2D.Impulse
+        );
     }
 
     private void UpdateAimLine()
     {
-        Vector2 currentMousePosition = GetMouseWorldPosition();
-        Vector2 launchVector = CalculateLaunchVector(currentMousePosition);
+        Vector2 currentMousePosition =
+            GetMouseWorldPosition();
+
+        Vector2 launchVector =
+            CalculateLaunchVector(currentMousePosition);
 
         Vector3 lineStart = transform.position;
-        Vector3 lineEnd = (Vector2)transform.position + launchVector;
+
+        Vector3 lineEnd =
+            (Vector2)transform.position + launchVector;
 
         aimLine.SetPosition(0, lineStart);
         aimLine.SetPosition(1, lineEnd);
     }
 
-    private Vector2 CalculateLaunchVector(Vector2 currentMousePosition)
+    private Vector2 CalculateLaunchVector(
+        Vector2 currentMousePosition
+    )
     {
-        Vector2 launchVector = dragStartPosition - currentMousePosition;
+        Vector2 launchVector =
+            dragStartPosition - currentMousePosition;
 
         return Vector2.ClampMagnitude(
             launchVector,
@@ -174,10 +192,15 @@ public class PieceLauncher : MonoBehaviour
 
     private Vector2 GetMouseWorldPosition()
     {
-        Vector3 mouseScreenPosition = Input.mousePosition;
-        mouseScreenPosition.z = -mainCamera.transform.position.z;
+        Vector3 mouseScreenPosition =
+            Input.mousePosition;
 
-        return mainCamera.ScreenToWorldPoint(mouseScreenPosition);
+        mouseScreenPosition.z =
+            -mainCamera.transform.position.z;
+
+        return mainCamera.ScreenToWorldPoint(
+            mouseScreenPosition
+        );
     }
 
     private void MarkAsActiveAttacker()
@@ -190,9 +213,22 @@ public class PieceLauncher : MonoBehaviour
         foreach (PieceLauncher piece in allLaunchers)
         {
             piece.IsActiveAttacker = false;
+            piece.CanDealDamageThisShot = false;
         }
 
         IsActiveAttacker = true;
+
+        EnableChainAttackDamage();
+    }
+
+    public void EnableChainAttackDamage()
+    {
+        if (CanDealDamageThisShot)
+        {
+            return;
+        }
+
+        CanDealDamageThisShot = true;
 
         PieceCombat combat =
             GetComponent<PieceCombat>();

@@ -199,6 +199,7 @@ GameObject:
   - component: {fileID: 173122122813554948}
   - component: {fileID: 1476669847587361489}
   - component: {fileID: 6809113090850781865}
+  - component: {fileID: 824170537042948658}
   m_Layer: 0
   m_Name: red piece
   m_TagString: Untagged
@@ -488,9 +489,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30501f163e18b3b47b0403373b0cb323, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceStats
-  maxHealth: 6
-  attackPower: 2
-  currentHealth: 6
+  maxHealth: 20
+  attackPower: 4
+  currentHealth: 20
   isDead: 0
 --- !u!114 &6809113090850781865
 MonoBehaviour:
@@ -505,3 +506,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PieceStatsDisplay
   statsText: {fileID: 634875109888383786}
+--- !u!114 &824170537042948658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041306706797630330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c47d109ed43c35c41b13bd29a46993f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PieceCombat
+  damageCooldown: 0.01
+  minimumDamageSpeed: 0.25

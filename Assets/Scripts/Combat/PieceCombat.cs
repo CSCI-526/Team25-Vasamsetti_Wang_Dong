@@ -5,35 +5,51 @@ using UnityEngine;
 [RequireComponent(typeof(PieceStats))]
 public class PieceCombat : MonoBehaviour
 {
-    private PieceLauncher launcher;
-    private PieceStats stats;
+    [Header("Collision Damage Settings")]
+    [SerializeField] private float damageCooldown = 0.02f;
+    [SerializeField] private float minimumDamageSpeed = 0.05f;
 
-    private readonly HashSet<int> damagedTargets =
-        new HashSet<int>();
+    private PieceLauncher launcher;
+    private PieceStats pieceStats;
+
+    private readonly Dictionary<int, float> lastDamageTimes =
+        new Dictionary<int, float>();
 
     private void Awake()
     {
         launcher = GetComponent<PieceLauncher>();
-        stats = GetComponent<PieceStats>();
+        pieceStats = GetComponent<PieceStats>();
     }
 
     public void BeginAttack()
     {
-        damagedTargets.Clear();
+        lastDamageTimes.Clear();
     }
 
     private void OnCollisionEnter2D(
         Collision2D collision
     )
     {
-        // Only the piece actively launched by the player
-        // can cause damage.
-        if (!launcher.IsActiveAttacker)
+        ProcessCollision(collision);
+    }
+
+    private void OnCollisionStay2D(
+        Collision2D collision
+    )
+    {
+        ProcessCollision(collision);
+    }
+
+    private void ProcessCollision(
+        Collision2D collision
+    )
+    {
+        if (!launcher.CanDealDamageThisShot)
         {
             return;
         }
 
-        if (stats.IsDead)
+        if (pieceStats.IsDead)
         {
             return;
         }
@@ -41,19 +57,12 @@ public class PieceCombat : MonoBehaviour
         PieceStats targetStats =
             collision.collider.GetComponentInParent<PieceStats>();
 
-        // Walls and normal obstacles do not have PieceStats.
         if (targetStats == null)
         {
             return;
         }
 
-        if (targetStats == stats)
-        {
-            return;
-        }
-
-        // Friendly pieces do not take damage.
-        if (targetStats.Team == stats.Team)
+        if (targetStats == pieceStats)
         {
             return;
         }
@@ -63,20 +72,88 @@ public class PieceCombat : MonoBehaviour
             return;
         }
 
-        int targetID = targetStats.GetInstanceID();
+        if (targetStats.Team == pieceStats.Team)
+        {
+            ActivateAllyForChainAttack(targetStats);
+            return;
+        }
 
-        // The same target can only be damaged once
-        // during one launch.
-        if (damagedTargets.Contains(targetID))
+        TryDamageEnemy(
+            collision,
+            targetStats
+        );
+    }
+
+    private void ActivateAllyForChainAttack(
+        PieceStats allyStats
+    )
+    {
+        PieceLauncher allyLauncher =
+            allyStats.GetComponent<PieceLauncher>();
+
+        if (allyLauncher == null)
         {
             return;
         }
 
-        damagedTargets.Add(targetID);
+        allyLauncher.EnableChainAttackDamage();
+
+        Debug.Log(
+            pieceStats.gameObject.name +
+            " activated " +
+            allyStats.gameObject.name +
+            " for chain attack damage."
+        );
+    }
+
+    private void TryDamageEnemy(
+        Collision2D collision,
+        PieceStats targetStats
+    )
+    {
+        float collisionSpeed =
+            collision.relativeVelocity.magnitude;
+
+        if (collisionSpeed < minimumDamageSpeed)
+        {
+            return;
+        }
+
+        int targetID =
+            targetStats.GetInstanceID();
+
+        if (lastDamageTimes.TryGetValue(
+            targetID,
+            out float lastDamageTime
+        ))
+        {
+            float timeSinceLastDamage =
+                Time.time - lastDamageTime;
+
+            if (timeSinceLastDamage < damageCooldown)
+            {
+                return;
+            }
+        }
+
+        lastDamageTimes[targetID] = Time.time;
 
         targetStats.TakeDamage(
-            stats.AttackPower,
-            stats
+            pieceStats.AttackPower,
+            pieceStats
+        );
+    }
+
+    private void OnValidate()
+    {
+        damageCooldown = Mathf.Max(
+            0f,
+            damageCooldown
+        );
+
+        minimumDamageSpeed = Mathf.Max(
+            0f,
+            minimumDamageSpeed
         );
     }
 }
