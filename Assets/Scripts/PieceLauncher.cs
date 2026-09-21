@@ -11,7 +11,12 @@ public class PieceLauncher : MonoBehaviour
     [SerializeField] private float minimumDragDistance = 0.1f;
 
     [Header("Selection Settings")]
+    [SerializeField] private PieceTeamSide team = PieceTeamSide.Blue;
+    [SerializeField] private bool controlEnabled = true;
     [SerializeField] private float selectableSpeed = 0.1f;
+
+    public PieceTeamSide Team => team;
+    public bool ControlEnabled => controlEnabled;
 
     [Header("Aim Line Settings")]
     [SerializeField] private float lineStartWidth = 0.1f;
@@ -22,6 +27,7 @@ public class PieceLauncher : MonoBehaviour
     private Rigidbody2D rb;
     private Camera mainCamera;
     private LineRenderer aimLine;
+    private PhysicsStopDetector stopDetector;
 
     private Vector2 dragStartPosition;
     private bool isDragging;
@@ -31,6 +37,16 @@ public class PieceLauncher : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         mainCamera = Camera.main;
         aimLine = GetComponent<LineRenderer>();
+
+        stopDetector = FindFirstObjectByType<PhysicsStopDetector>();
+
+        if (stopDetector == null)
+        {
+            Debug.LogError(
+                "No PhysicsStopDetector was found in the scene.",
+                this
+            );
+        }
 
         ConfigureAimLine();
     }
@@ -54,7 +70,34 @@ public class PieceLauncher : MonoBehaviour
 
     private void OnMouseDown()
     {
-        // Do not select this piece while it is still moving.
+        if (!controlEnabled)
+        {
+            Debug.Log(
+                gameObject.name + " cannot be selected during this turn."
+            );
+
+            return;
+        }
+
+        if (stopDetector == null)
+        {
+            Debug.LogError(
+                "This piece cannot launch because PhysicsStopDetector is missing.",
+                this
+            );
+
+            return;
+        }
+
+        if (!stopDetector.AllPiecesStopped)
+        {
+            Debug.Log(
+                gameObject.name + " cannot launch because another piece is moving."
+            );
+
+            return;
+        }
+
         if (rb.linearVelocity.magnitude > selectableSpeed)
         {
             return;
@@ -92,6 +135,11 @@ public class PieceLauncher : MonoBehaviour
 
         if (launchVector.magnitude >= minimumDragDistance)
         {
+            if (stopDetector != null)
+            {
+                stopDetector.NotifyShotLaunched();
+            }
+
             rb.AddForce(
                 launchVector * launchForce,
                 ForceMode2D.Impulse
@@ -127,6 +175,21 @@ public class PieceLauncher : MonoBehaviour
         mouseScreenPosition.z = -mainCamera.transform.position.z;
 
         return mainCamera.ScreenToWorldPoint(mouseScreenPosition);
+    }
+
+    public void SetControlEnabled(bool enabled)
+    {
+        controlEnabled = enabled;
+
+        if (!controlEnabled)
+        {
+            isDragging = false;
+
+            if (aimLine != null)
+            {
+                aimLine.enabled = false;
+            }
+        }
     }
 
     private void OnDisable()
