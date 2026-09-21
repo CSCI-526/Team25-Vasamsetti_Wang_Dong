@@ -17,6 +17,7 @@ public class PieceLauncher : MonoBehaviour
 
     public PieceTeamSide Team => team;
     public bool ControlEnabled => controlEnabled;
+    public bool IsActiveAttacker { get; private set; }
 
     [Header("Aim Line Settings")]
     [SerializeField] private float lineStartWidth = 0.1f;
@@ -135,6 +136,8 @@ public class PieceLauncher : MonoBehaviour
 
         if (launchVector.magnitude >= minimumDragDistance)
         {
+            MarkAsActiveAttacker();
+
             if (stopDetector != null)
             {
                 stopDetector.NotifyShotLaunched();
@@ -175,6 +178,29 @@ public class PieceLauncher : MonoBehaviour
         mouseScreenPosition.z = -mainCamera.transform.position.z;
 
         return mainCamera.ScreenToWorldPoint(mouseScreenPosition);
+    }
+
+    private void MarkAsActiveAttacker()
+    {
+        PieceLauncher[] allLaunchers =
+            FindObjectsByType<PieceLauncher>(
+                FindObjectsSortMode.None
+            );
+
+        foreach (PieceLauncher piece in allLaunchers)
+        {
+            piece.IsActiveAttacker = false;
+        }
+
+        IsActiveAttacker = true;
+
+        PieceCombat combat =
+            GetComponent<PieceCombat>();
+
+        if (combat != null)
+        {
+            combat.BeginAttack();
+        }
     }
 
     public void SetControlEnabled(bool enabled)
