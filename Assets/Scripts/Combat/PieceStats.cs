@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -16,6 +15,11 @@ public class PieceStats : MonoBehaviour
     [FormerlySerializedAs("attackPower")]
     private int baseAttackPower = 2;
 
+    [Header("Piece Type")]
+    [Tooltip("When assigned, this type config drives HP / attack / mass / launch force.")]
+    [SerializeField]
+    private PieceTypeDefinition typeDefinition;
+
     [Header("Runtime Stats - Do Not Edit")]
     [SerializeField]
     private int currentHealth;
@@ -28,17 +32,12 @@ public class PieceStats : MonoBehaviour
 
     private PieceLauncher launcher;
     private Rigidbody2D rb;
-    private PhysicsStopDetector stopDetector;
 
     private Vector3 startingPosition;
     private Quaternion startingRotation;
 
     private Collider2D[] pieceColliders;
     private Renderer[] pieceRenderers;
-
-    private bool[] previousColliderStates;
-    private bool[] previousRendererStates;
-    private bool previousSimulatedState;
 
     public int BaseHealth => baseHealth;
     public int CurrentHealth => currentHealth;
@@ -75,9 +74,6 @@ public class PieceStats : MonoBehaviour
         launcher = GetComponent<PieceLauncher>();
         rb = GetComponent<Rigidbody2D>();
 
-        stopDetector =
-            FindFirstObjectByType<PhysicsStopDetector>();
-
         startingPosition = transform.position;
         startingRotation = transform.rotation;
 
@@ -87,13 +83,33 @@ public class PieceStats : MonoBehaviour
         pieceRenderers =
             GetComponentsInChildren<Renderer>(true);
 
-        previousColliderStates =
-            new bool[pieceColliders.Length];
-
-        previousRendererStates =
-            new bool[pieceRenderers.Length];
+        ApplyTypeDefinition();
 
         ResetRuntimeStats();
+    }
+
+    // Pulls base stats, mass and launch force from the assigned type config.
+    private void ApplyTypeDefinition()
+    {
+        if (typeDefinition == null)
+        {
+            return;
+        }
+
+        baseHealth = Mathf.Max(1, typeDefinition.MaxHP);
+        baseAttackPower = Mathf.Max(0, typeDefinition.Attack);
+
+        if (rb != null)
+        {
+            rb.mass = Mathf.Max(0.01f, typeDefinition.Mass);
+        }
+
+        if (launcher != null)
+        {
+            launcher.SetLaunchForceMultiplier(
+                typeDefinition.LaunchForceMultiplier
+            );
+        }
     }
 
     public void RegisterKill(PieceStats defeatedPiece)
@@ -196,30 +212,22 @@ public class PieceStats : MonoBehaviour
             attacker.RegisterKill(this);
         }
 
-        // 关闭死亡棋子的物理和画面
+        // Disable the defeated piece's physics and visuals.
+        // It stays eliminated for the rest of the match (no respawn).
         EnterDefeatedState();
-
-        // 等本次行动完全结束后再复活
-        StartCoroutine(WaitForActionEndAndRespawn());
     }
 
     private void EnterDefeatedState()
     {
-        // 保存并关闭所有碰撞体
+        // Disable all colliders.
         for (int i = 0; i < pieceColliders.Length; i++)
         {
-            previousColliderStates[i] =
-                pieceColliders[i].enabled;
-
             pieceColliders[i].enabled = false;
         }
 
-        // 保存并隐藏棋子、属性文字和技能标记
+        // Hide the piece, its stats text and any ability markers.
         for (int i = 0; i < pieceRenderers.Length; i++)
         {
-            previousRendererStates[i] =
-                pieceRenderers[i].enabled;
-
             pieceRenderers[i].enabled = false;
         }
 
@@ -227,38 +235,16 @@ public class PieceStats : MonoBehaviour
         {
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
-
-            previousSimulatedState = rb.simulated;
             rb.simulated = false;
         }
     }
 
-    private IEnumerator WaitForActionEndAndRespawn()
+    /// <summary>
+    /// Fully restores this piece to its starting state.
+    /// Called by MatchWinManager.RestartMatch(); not used on normal death.
+    /// </summary>
+    public void ResetToStart()
     {
-        // 先等待一帧，让当前碰撞结算彻底结束
-        yield return null;
-
-        if (stopDetector == null)
-        {
-            stopDetector =
-                FindFirstObjectByType<PhysicsStopDetector>();
-        }
-
-        // 等场上的所有棋子停止
-        if (stopDetector != null)
-        {
-            while (!stopDetector.AllPiecesStopped)
-            {
-                yield return null;
-            }
-        }
-
-        Respawn();
-    }
-
-    private void Respawn()
-    {
-        // Rigidbody2D 仍然关闭时，先移动回出生点
         transform.SetPositionAndRotation(
             startingPosition,
             startingRotation
@@ -272,28 +258,26 @@ public class PieceStats : MonoBehaviour
             rb.linearVelocity = Vector2.zero;
             rb.angularVelocity = 0f;
 
-            rb.simulated = previousSimulatedState;
+            rb.simulated = true;
         }
 
-        // 恢复碰撞体原来的状态
+        // Re-enable every collider.
         for (int i = 0; i < pieceColliders.Length; i++)
         {
-            pieceColliders[i].enabled =
-                previousColliderStates[i];
+            pieceColliders[i].enabled = true;
         }
 
-        // 恢复棋子、文字和技能标记原来的显示状态
+        // Show the piece, its stats text and any ability markers again.
         for (int i = 0; i < pieceRenderers.Length; i++)
         {
-            pieceRenderers[i].enabled =
-                previousRendererStates[i];
+            pieceRenderers[i].enabled = true;
         }
 
-        // 恢复基础生命值和基础攻击力
+        // Restore base HP / attack and clear the dead flag.
         ResetRuntimeStats();
 
         Debug.Log(
-            $"{name} respawned after the action ended."
+            $"{name} was reset to its starting state."
         );
     }
 

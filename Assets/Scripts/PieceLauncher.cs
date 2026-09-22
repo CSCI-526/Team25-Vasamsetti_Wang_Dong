@@ -10,6 +10,9 @@ public class PieceLauncher : MonoBehaviour
     [SerializeField] private float maxDragDistance = 3f;
     [SerializeField] private float minimumDragDistance = 0.1f;
 
+    // Set from the piece type config (Speed launches harder, Heavy softer).
+    [SerializeField] private float launchForceMultiplier = 1f;
+
     [Header("Selection Settings")]
     [SerializeField]
     private PieceTeamSide team =
@@ -156,9 +159,15 @@ public class PieceLauncher : MonoBehaviour
         }
 
         rb.AddForce(
-            launchVector * launchForce,
+            launchVector * launchForce * launchForceMultiplier,
             ForceMode2D.Impulse
         );
+    }
+
+    // Called by PieceStats when a piece type config is applied.
+    public void SetLaunchForceMultiplier(float value)
+    {
+        launchForceMultiplier = Mathf.Max(0f, value);
     }
 
     private void UpdateAimLine()

@@ -21,6 +21,9 @@ public class TurnManager : MonoBehaviour
     // 表示本次行动是否已经开始
     private bool actionInProgress;
 
+    // 胜负已定后停止切换回合
+    private bool matchOver;
+
     // 为“首次击杀额外行动”技能提前准备
     private bool extraActionPending;
     // 每次正式切换队伍时增加，用来区分不同回合
@@ -75,6 +78,12 @@ public class TurnManager : MonoBehaviour
 
     private void FinishCurrentAction()
     {
+        // Match already decided: stop switching turns.
+        if (matchOver)
+        {
+            return;
+        }
+
         // 如果获得了额外行动，就不切换队伍
         if (extraActionPending)
         {
@@ -179,6 +188,26 @@ public class TurnManager : MonoBehaviour
         allLaunchers = FindObjectsByType<PieceLauncher>(
             FindObjectsSortMode.None
         );
+    }
+
+    // Called by MatchWinManager when the match ends or restarts.
+    public void SetMatchOver(bool value)
+    {
+        matchOver = value;
+    }
+
+    // Resets the turn state back to Blue's opening turn.
+    public void ResetToStart()
+    {
+        matchOver = false;
+        actionInProgress = false;
+        extraActionPending = false;
+
+        currentTeam = PieceTeamSide.Blue;
+        turnSequence = 1;
+
+        RefreshPieces();
+        ApplyCurrentTurn();
     }
 
     private void OnDestroy()
