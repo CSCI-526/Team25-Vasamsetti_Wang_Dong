@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -16,6 +17,12 @@ public class TurnManager : MonoBehaviour
     [SerializeField]
     private TMP_Text turnText;
 
+    [Header("Turn Timer")]
+    [Tooltip("Seconds a team has to launch a piece before the turn passes to the other team. 0 = no limit.")]
+    [SerializeField]
+    [Min(0f)]
+    private float turnTimeLimit = 6f;
+
     private PieceLauncher[] allLaunchers;
 
     // 表示本次行动是否已经开始
@@ -28,8 +35,25 @@ public class TurnManager : MonoBehaviour
     private bool extraActionPending;
     // 每次正式切换队伍时增加，用来区分不同回合
     private int turnSequence = 1;
+
+    // Counts down while the current team is choosing a shot.
+    private float timeRemaining;
+
     public PieceTeamSide CurrentTeam => currentTeam;
     public int TurnSequence => turnSequence;
+    public float TurnTimeLimit => turnTimeLimit;
+    public float TimeRemaining => timeRemaining;
+
+    // True while the clock is counting (no shot in progress, match still running).
+    public bool IsTimerRunning =>
+        turnTimeLimit > 0f &&
+        !matchOver &&
+        !actionInProgress &&
+        stopDetector != null &&
+        stopDetector.AllPiecesStopped;
+
+    // Fired whenever control is handed to a team (used by ScoreDashboard).
+    public event Action<PieceTeamSide> TurnChanged;
 
     private void Awake()
     {
@@ -73,7 +97,32 @@ public class TurnManager : MonoBehaviour
         {
             actionInProgress = false;
             FinishCurrentAction();
+            return;
         }
+
+        TickTurnTimer();
+    }
+
+    private void TickTurnTimer()
+    {
+        if (!IsTimerRunning)
+        {
+            return;
+        }
+
+        timeRemaining -= Time.deltaTime;
+
+        if (timeRemaining > 0f)
+        {
+            return;
+        }
+
+        timeRemaining = 0f;
+
+        Debug.Log($"{currentTeam} ran out of time.");
+
+        // Too slow: hand the turn to the other team.
+        SwitchTeam();
     }
 
     private void FinishCurrentAction()
@@ -125,6 +174,9 @@ public class TurnManager : MonoBehaviour
 
     private void ApplyCurrentTurn()
     {
+        // Every new turn (or extra action) starts with a full clock.
+        timeRemaining = turnTimeLimit;
+
         if (allLaunchers == null)
         {
             RefreshPieces();
@@ -146,6 +198,8 @@ public class TurnManager : MonoBehaviour
         }
 
         UpdateTurnText();
+
+        TurnChanged?.Invoke(currentTeam);
     }
 
     private void UpdateTurnText()
@@ -205,6 +259,7 @@ public class TurnManager : MonoBehaviour
 
         currentTeam = PieceTeamSide.Blue;
         turnSequence = 1;
+        timeRemaining = turnTimeLimit;
 
         RefreshPieces();
         ApplyCurrentTurn();

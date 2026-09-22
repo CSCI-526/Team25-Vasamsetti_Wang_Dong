@@ -61,6 +61,10 @@ public class PieceStats : MonoBehaviour
     public event Action HealthChanged;
     public event Action StatsChanged;
 
+    // Fired when stats are restored to their starting values (match restart),
+    // just before StatsChanged, so displays can snap instead of animating.
+    public event Action StatsReset;
+
     // 参数是击杀者
     public event Action<PieceStats> Died;
     // 当前棋子完成击杀时触发
@@ -287,6 +291,7 @@ public class PieceStats : MonoBehaviour
         currentAttackPower = baseAttackPower;
         isDead = false;
 
+        StatsReset?.Invoke();
         HealthChanged?.Invoke();
         StatsChanged?.Invoke();
     }

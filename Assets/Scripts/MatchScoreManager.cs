@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -14,6 +15,9 @@ public class MatchScoreManager : MonoBehaviour
 
     public int BlueScore => blueScore;
     public int RedScore => redScore;
+
+    // Fired whenever either team's score changes (used by ScoreDashboard).
+    public event Action ScoreChanged;
 
     private void Start()
     {
@@ -62,6 +66,8 @@ public class MatchScoreManager : MonoBehaviour
 
     private void UpdateScoreText()
     {
+        ScoreChanged?.Invoke();
+
         if (scoreText == null)
         {
             return;
