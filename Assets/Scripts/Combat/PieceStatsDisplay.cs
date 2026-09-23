@@ -27,19 +27,19 @@ public class PieceStatsDisplay : MonoBehaviour
 
     private void Awake()
     {
-        // 如果没有手动拖入 PieceStats，就自动寻找
+        // No PieceStats assigned in the Inspector: find it automatically.
         if (stats == null)
         {
             stats = GetComponentInParent<PieceStats>();
         }
 
-        // 如果脚本和文字组件在同一个物体上，就从自身寻找
+        // Script and text component on the same object: look on ourselves.
         if (statsText == null)
         {
             statsText = GetComponent<TMP_Text>();
         }
 
-        // 如果脚本放在棋子根物体上，就从子物体中寻找文字
+        // Script on the piece root: look for the text among the children.
         if (statsText == null)
         {
             statsText = GetComponentInChildren<TMP_Text>(true);

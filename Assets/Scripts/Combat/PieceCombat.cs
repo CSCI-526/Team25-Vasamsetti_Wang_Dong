@@ -47,8 +47,8 @@ public class PieceCombat : MonoBehaviour
             return false;
         }
 
-        // 有正式回合系统时：
-        // 当前行动队伍的所有棋子都可以造成普通碰撞伤害
+        // With the turn system in place, every piece on the acting team
+        // can deal normal collision damage.
         if (TurnManager.Instance != null)
         {
             return TurnManager.Instance.IsTeamTurn(
@@ -56,8 +56,8 @@ public class PieceCombat : MonoBehaviour
             );
         }
 
-        // 没有 TurnManager 时保留旧逻辑，
-        // 方便单独测试物理场景
+        // Without a TurnManager, fall back to the old rule so the physics
+        // scene can still be tested on its own.
         if (launcher != null)
         {
             return launcher.CanDealDamageThisShot;

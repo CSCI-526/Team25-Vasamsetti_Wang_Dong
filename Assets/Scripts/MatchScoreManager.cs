@@ -42,7 +42,7 @@ public class MatchScoreManager : MonoBehaviour
 
     private void HandlePieceDefeated(PieceStats attacker)
     {
-        // 如果没有攻击者，例如以后加入地图陷阱，就不加分
+        // No attacker (a map hazard later on, for example) scores no point.
         if (attacker == null)
         {
             return;

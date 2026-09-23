@@ -2,15 +2,15 @@ public enum PieceAbilityType
 {
     None,
 
-    // 每回合第一次击杀后，获得一次额外行动
+    // Grants one extra action after the first kill of a turn.
     ExtraActionOnKill,
 
-    // 碰到友军时，提高被碰友军的攻击力
+    // On bumping into a teammate, raises that teammate's attack power.
     AllyAttackBoost,
 
-    // 碰到友军时，治疗被碰友军
+    // On bumping into a teammate, heals that teammate.
     AllyHeal,
 
-    // 防守时受到攻击，对攻击者造成固定伤害
+    // When damaged while defending, deals flat damage back to the attacker.
     DefensiveCounter
 }

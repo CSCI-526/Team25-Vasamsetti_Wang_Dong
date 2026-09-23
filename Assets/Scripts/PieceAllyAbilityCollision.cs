@@ -39,7 +39,7 @@ public class PieceAllyAbilityCollision : MonoBehaviour
             return;
         }
 
-        // 技能只对友军生效
+        // Abilities only apply to teammates.
         if (otherStats.Team != pieceStats.Team)
         {
             return;

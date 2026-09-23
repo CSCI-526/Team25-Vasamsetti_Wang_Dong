@@ -25,15 +25,15 @@ public class TurnManager : MonoBehaviour
 
     private PieceLauncher[] allLaunchers;
 
-    // 表示本次行动是否已经开始
+    // Whether the current action has already started.
     private bool actionInProgress;
 
-    // 胜负已定后停止切换回合
+    // Stop handing out turns once the match is decided.
     private bool matchOver;
 
-    // 为“首次击杀额外行动”技能提前准备
+    // Set up for the "extra action on first kill" ability.
     private bool extraActionPending;
-    // 每次正式切换队伍时增加，用来区分不同回合
+    // Increases on every real team switch, so turns can be told apart.
     private int turnSequence = 1;
 
     // Counts down while the current team is choosing a shot.
@@ -85,14 +85,14 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        // 有棋子正在移动，说明本次行动已经开始
+        // A piece is still moving, so the action has begun.
         if (!stopDetector.AllPiecesStopped)
         {
             actionInProgress = true;
             return;
         }
 
-        // 行动开始过，并且现在所有棋子已经停止
+        // The action started and every piece has now come to a stop.
         if (actionInProgress)
         {
             actionInProgress = false;
@@ -133,7 +133,7 @@ public class TurnManager : MonoBehaviour
             return;
         }
 
-        // 如果获得了额外行动，就不切换队伍
+        // An extra action was earned: keep the turn with the same team.
         if (extraActionPending)
         {
             extraActionPending = false;
@@ -160,8 +160,8 @@ public class TurnManager : MonoBehaviour
             currentTeam = PieceTeamSide.Blue;
         }
 
-        // 只有正式切换队伍才算进入新回合
-        // 额外行动不会增加这个编号
+        // Only a real team switch counts as a new turn;
+        // extra actions do not bump this number.
         turnSequence++;
 
         ApplyCurrentTurn();
@@ -228,7 +228,7 @@ public class TurnManager : MonoBehaviour
 
     public void GrantExtraAction(PieceTeamSide team)
     {
-        // 只能给当前正在行动的队伍增加行动
+        // Only the team that is currently acting can be given another action.
         if (team != currentTeam)
         {
             return;

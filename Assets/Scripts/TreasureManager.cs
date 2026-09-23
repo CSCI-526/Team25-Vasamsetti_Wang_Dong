@@ -1,22 +1,29 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Randomly spawns a healing treasure on the board.
-///  - At the start of a turn there is a spawnChance of a treasure appearing
-///    (only one at a time, never on top of a piece or against a wall).
-///  - It stays for turnsToStay turns, so both teams get a chance at it.
-///  - Any piece that passes over it collects it for its own team:
+/// Randomly spawns healing treasures on the board.
+///  - At the start of a turn there is a spawnChance of a treasure appearing,
+///    but only while the two teams have an uneven number of living pieces.
+///  - Several treasures can be out at once (up to maxActiveTreasures); none of
+///    them spawns on top of a piece, a wall or another treasure.
+///  - Each one stays for turnsToStay turns, so both teams get a chance at it.
+///  - Any piece that passes over one collects it for its own team:
 ///    every living piece on that team heals healAmount HP (up to its starting HP).
 /// </summary>
 public class TreasureManager : MonoBehaviour
 {
     [Header("Spawning")]
-    [SerializeField] [Range(0f, 1f)] private float spawnChance = 0.3f;
+    [SerializeField] [Range(0f, 1f)] private float spawnChance = 0.6f;
     [SerializeField] [Min(1)] private int turnsToStay = 2;
+    [Tooltip("How many treasures may sit on the board at the same time.")]
+    [SerializeField] [Min(1)] private int maxActiveTreasures = 3;
     [Tooltip("Distance from the camera edge the treasure must keep.")]
     [SerializeField] private float edgeMargin = 1.2f;
     [Tooltip("No collider (piece or wall) may be inside this radius when spawning.")]
     [SerializeField] private float clearRadius = 1.6f;
+    [Tooltip("Minimum distance between two treasures.")]
+    [SerializeField] private float treasureSpacing = 2.5f;
     [SerializeField] private int maxSpawnAttempts = 30;
 
     [Header("Reward")]
@@ -26,12 +33,18 @@ public class TreasureManager : MonoBehaviour
     [SerializeField] private float treasureRadius = 0.4f;
     [SerializeField] private Color treasureColor = new Color(1f, 0.8f, 0.2f);
 
+    // A treasure on the board plus how many turns it has left.
+    private class ActiveTreasure
+    {
+        public Treasure treasure;
+        public int turnsLeft;
+    }
+
     private TurnManager turnManager;
     private MatchWinManager winManager;
     private PieceStats[] pieces;
 
-    private Treasure activeTreasure;
-    private int turnsLeft;
+    private readonly List<ActiveTreasure> activeTreasures = new List<ActiveTreasure>();
 
     private void Start()
     {
@@ -48,7 +61,7 @@ public class TreasureManager : MonoBehaviour
         if (winManager != null)
         {
             winManager.MatchOver += HandleMatchOver;
-            winManager.MatchReset += Despawn;
+            winManager.MatchReset += DespawnAll;
         }
     }
 
@@ -62,7 +75,7 @@ public class TreasureManager : MonoBehaviour
         if (winManager != null)
         {
             winManager.MatchOver -= HandleMatchOver;
-            winManager.MatchReset -= Despawn;
+            winManager.MatchReset -= DespawnAll;
         }
     }
 
@@ -73,20 +86,18 @@ public class TreasureManager : MonoBehaviour
             return;
         }
 
-        // A treasure is already out: count down its remaining turns.
-        if (activeTreasure != null)
+        // Age the treasures that are already out before adding a new one.
+        TickActiveTreasures();
+
+        if (activeTreasures.Count >= maxActiveTreasures)
         {
-            turnsLeft--;
+            return;
+        }
 
-            if (turnsLeft <= 0)
-            {
-                Despawn();
-            }
-            else
-            {
-                activeTreasure.SetLastTurn(turnsLeft == 1);
-            }
-
+        // Treasures are a comeback mechanic: they only show up while one team
+        // has more bodies on the board than the other.
+        if (!TeamsAreUneven())
+        {
             return;
         }
 
@@ -96,9 +107,61 @@ public class TreasureManager : MonoBehaviour
         }
     }
 
+    private void TickActiveTreasures()
+    {
+        for (int i = activeTreasures.Count - 1; i >= 0; i--)
+        {
+            ActiveTreasure entry = activeTreasures[i];
+
+            if (entry.treasure == null)
+            {
+                activeTreasures.RemoveAt(i);
+                continue;
+            }
+
+            entry.turnsLeft--;
+
+            if (entry.turnsLeft <= 0)
+            {
+                Destroy(entry.treasure.gameObject);
+                activeTreasures.RemoveAt(i);
+            }
+            else
+            {
+                entry.treasure.SetLastTurn(entry.turnsLeft == 1);
+            }
+        }
+    }
+
+    private bool TeamsAreUneven()
+    {
+        int blueAlive = 0;
+        int redAlive = 0;
+
+        foreach (PieceStats piece in pieces)
+        {
+            if (piece == null || piece.IsDead)
+            {
+                continue;
+            }
+
+            if (piece.Team == PieceTeamSide.Blue)
+            {
+                blueAlive++;
+            }
+            else
+            {
+                redAlive++;
+            }
+        }
+
+        // A wiped out team means the match is already decided.
+        return blueAlive > 0 && redAlive > 0 && blueAlive != redAlive;
+    }
+
     private void HandleMatchOver(PieceTeamSide winner)
     {
-        Despawn();
+        DespawnAll();
     }
 
     private void TrySpawn()
@@ -123,13 +186,20 @@ public class TreasureManager : MonoBehaviour
         GameObject go = new GameObject("Treasure");
         go.transform.position = position;
 
-        activeTreasure = go.AddComponent<Treasure>();
-        activeTreasure.Init(this, treasureRadius, treasureColor, pieceRenderer);
+        Treasure treasure = go.AddComponent<Treasure>();
+        treasure.Init(this, treasureRadius, treasureColor, pieceRenderer);
+        treasure.SetLastTurn(turnsToStay == 1);
 
-        turnsLeft = turnsToStay;
-        activeTreasure.SetLastTurn(turnsLeft == 1);
+        activeTreasures.Add(new ActiveTreasure
+        {
+            treasure = treasure,
+            turnsLeft = turnsToStay
+        });
 
-        Debug.Log($"Treasure spawned at {position} for {turnsToStay} turns.");
+        Debug.Log(
+            $"Treasure spawned at {position} for {turnsToStay} turns " +
+            $"({activeTreasures.Count} on the board)."
+        );
     }
 
     private bool TryFindSpawnPosition(out Vector2 position)
@@ -154,9 +224,39 @@ public class TreasureManager : MonoBehaviour
             );
 
             // Nothing (pieces, walls) nearby = a fair spot nobody gets for free.
-            if (Physics2D.OverlapCircle(candidate, clearRadius) == null)
+            if (Physics2D.OverlapCircle(candidate, clearRadius) != null)
             {
-                position = candidate;
+                continue;
+            }
+
+            // Keep treasures apart so one shot cannot sweep up a whole cluster.
+            if (IsTooCloseToAnotherTreasure(candidate))
+            {
+                continue;
+            }
+
+            position = candidate;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool IsTooCloseToAnotherTreasure(Vector2 candidate)
+    {
+        float squaredSpacing = treasureSpacing * treasureSpacing;
+
+        foreach (ActiveTreasure entry in activeTreasures)
+        {
+            if (entry.treasure == null)
+            {
+                continue;
+            }
+
+            Vector2 other = entry.treasure.transform.position;
+
+            if ((other - candidate).sqrMagnitude < squaredSpacing)
+            {
                 return true;
             }
         }
@@ -167,7 +267,9 @@ public class TreasureManager : MonoBehaviour
     // Called by Treasure when a piece passes over it.
     public void Collect(Treasure treasure, PieceStats collector)
     {
-        if (treasure != activeTreasure)
+        int index = activeTreasures.FindIndex(entry => entry.treasure == treasure);
+
+        if (index < 0)
         {
             return;
         }
@@ -196,17 +298,20 @@ public class TreasureManager : MonoBehaviour
 
         Debug.Log($"{collector.name} collected the treasure for {team}.");
 
-        Despawn();
+        activeTreasures.RemoveAt(index);
+        Destroy(treasure.gameObject);
     }
 
-    private void Despawn()
+    private void DespawnAll()
     {
-        if (activeTreasure != null)
+        foreach (ActiveTreasure entry in activeTreasures)
         {
-            Destroy(activeTreasure.gameObject);
+            if (entry.treasure != null)
+            {
+                Destroy(entry.treasure.gameObject);
+            }
         }
 
-        activeTreasure = null;
-        turnsLeft = 0;
+        activeTreasures.Clear();
     }
 }

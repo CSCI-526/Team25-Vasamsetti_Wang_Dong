@@ -8,7 +8,7 @@ public class ExtraActionOnKillAbility : MonoBehaviour
     private PieceStats pieceStats;
     private PieceAbility pieceAbility;
 
-    // 记录上一次触发技能时的回合编号
+    // Turn number this ability last fired on.
     private int lastTriggeredTurnSequence = -1;
 
     private void Awake()
@@ -42,7 +42,7 @@ public class ExtraActionOnKillAbility : MonoBehaviour
             return;
         }
 
-        // 只有额外行动棋子才执行
+        // Only pieces carrying the extra action ability continue.
         if (!pieceAbility.HasAbility(
                 PieceAbilityType.ExtraActionOnKill))
         {
@@ -59,7 +59,7 @@ public class ExtraActionOnKillAbility : MonoBehaviour
             return;
         }
 
-        // 必须击杀敌方棋子
+        // The kill must be on an enemy piece.
         if (defeatedPiece.Team == pieceStats.Team)
         {
             return;
@@ -70,7 +70,7 @@ public class ExtraActionOnKillAbility : MonoBehaviour
             return;
         }
 
-        // 必须发生在技能棋子所属方的回合
+        // It must happen during this piece's own team turn.
         if (!TurnManager.Instance.IsTeamTurn(
                 pieceStats.Team))
         {
@@ -80,7 +80,7 @@ public class ExtraActionOnKillAbility : MonoBehaviour
         int currentTurnSequence =
             TurnManager.Instance.TurnSequence;
 
-        // 本回合已经触发过，不再重复触发
+        // Already fired this turn: do not grant a second action.
         if (lastTriggeredTurnSequence ==
             currentTurnSequence)
         {

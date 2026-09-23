@@ -10,17 +10,17 @@ public class PieceAbility : MonoBehaviour
         PieceAbilityType.None;
 
     [Header("Ability Values")]
-    [Tooltip("攻击强化技能每次增加的攻击力")]
+    [Tooltip("Attack power the attack boost ability grants per activation.")]
     [SerializeField]
     [Min(0)]
     private int attackBoostAmount = 1;
 
-    [Tooltip("治疗技能每次恢复的生命值")]
+    [Tooltip("HP the heal ability restores per activation.")]
     [SerializeField]
     [Min(0)]
     private int healAmount = 2;
 
-    [Tooltip("防守反击技能造成的固定伤害")]
+    [Tooltip("Flat damage the defensive counter ability deals.")]
     [SerializeField]
     [Min(0)]
     private int counterDamage = 1;
@@ -43,8 +43,8 @@ public class PieceAbility : MonoBehaviour
     }
 
     /// <summary>
-    /// 当这枚棋子碰到友军时调用。
-    /// allyStats 是被碰到的友军。
+    /// Called when this piece bumps into a teammate.
+    /// allyStats is the teammate that was hit.
     /// </summary>
     public void TryActivateOnAlly(PieceStats allyStats)
     {
@@ -58,7 +58,7 @@ public class PieceAbility : MonoBehaviour
             return;
         }
 
-        // 攻击强化和治疗只能在自己队伍的回合触发
+        // Attack boost and healing only fire on their own team's turn.
         if (TurnManager.Instance != null &&
             !TurnManager.Instance.IsTeamTurn(pieceStats.Team))
         {

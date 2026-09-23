@@ -40,7 +40,7 @@ public class DefensiveCounterAbility : MonoBehaviour
             return;
         }
 
-        // 只有防守反击棋子才继续执行
+        // Only pieces carrying the defensive counter ability continue.
         if (!pieceAbility.HasAbility(
                 PieceAbilityType.DefensiveCounter))
         {
@@ -52,26 +52,26 @@ public class DefensiveCounterAbility : MonoBehaviour
             return;
         }
 
-        // 友军伤害不触发反击
+        // Friendly fire never triggers a counter.
         if (attacker.Team == pieceStats.Team)
         {
             return;
         }
 
-        // 必须存在回合系统
+        // The turn system has to be present.
         if (TurnManager.Instance == null)
         {
             return;
         }
 
-        // 自己队伍的回合不能触发防守反击
+        // Counters only happen while defending, not on your own turn.
         if (TurnManager.Instance.IsTeamTurn(
                 pieceStats.Team))
         {
             return;
         }
 
-        // 确认攻击者属于当前行动队伍
+        // Make sure the attacker belongs to the team that is acting.
         if (!TurnManager.Instance.IsTeamTurn(
                 attacker.Team))
         {
@@ -91,7 +91,7 @@ public class DefensiveCounterAbility : MonoBehaviour
             $"for {counterDamage} damage."
         );
 
-        // 防守棋子成为这次反伤的伤害来源
+        // The defending piece is credited as the source of this damage.
         attacker.TakeDamage(
             counterDamage,
             pieceStats

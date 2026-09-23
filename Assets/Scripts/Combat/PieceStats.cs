@@ -65,10 +65,10 @@ public class PieceStats : MonoBehaviour
     // just before StatsChanged, so displays can snap instead of animating.
     public event Action StatsReset;
 
-    // 参数是击杀者
+    // The argument is the killer.
     public event Action<PieceStats> Died;
-    // 当前棋子完成击杀时触发
-    // 参数是被击杀的敌方棋子
+    // Fired when this piece scores a kill.
+    // The argument is the enemy piece that was defeated.
     public event Action<PieceStats> KilledEnemy;
     public event Action<PieceStats, int> Damaged;
 
@@ -144,7 +144,7 @@ public class PieceStats : MonoBehaviour
         HealthChanged?.Invoke();
         StatsChanged?.Invoke();
 
-        // 通知技能系统：这枚棋子确实受到了伤害
+        // Tell the ability system this piece actually took damage.
         Damaged?.Invoke(attacker, damage);
 
         Debug.Log(
@@ -207,10 +207,10 @@ public class PieceStats : MonoBehaviour
             $"{(attacker != null ? attacker.name : "unknown")}"
         );
 
-        // 通知计分系统：当前棋子被击杀
+        // Tell the scoring system this piece was defeated.
         Died?.Invoke(attacker);
 
-        // 通知攻击者：它完成了一次击杀
+        // Tell the attacker it scored a kill.
         if (attacker != null)
         {
             attacker.RegisterKill(this);
