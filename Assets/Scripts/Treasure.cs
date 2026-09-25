@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// A single treasure on the board. Pieces pass through it (trigger collider);
-/// the first living piece to touch it collects it via TreasureManager.
+/// TreasureManager decides whether the touching piece may collect it.
 /// Created at runtime by TreasureManager.
 /// </summary>
 public class Treasure : MonoBehaviour
@@ -109,7 +109,10 @@ public class Treasure : MonoBehaviour
             return;
         }
 
-        collected = true;
-        owner.Collect(this, piece);
+        // Enemy or full-HP pieces pass through and leave the treasure in place.
+        if (owner.TryCollect(this, piece))
+        {
+            collected = true;
+        }
     }
 }
