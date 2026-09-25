@@ -109,7 +109,7 @@ public class Treasure : MonoBehaviour
             return;
         }
 
-        // Enemy or full-HP pieces pass through and leave the treasure in place.
+        // Owner pieces heal from it, enemy pieces knock it away.
         if (owner.TryCollect(this, piece))
         {
             collected = true;

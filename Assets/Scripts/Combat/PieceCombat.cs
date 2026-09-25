@@ -6,7 +6,8 @@ using UnityEngine;
 public class PieceCombat : MonoBehaviour
 {
     [Header("Collision Damage Settings")]
-    [SerializeField] private float damageCooldown = 0.02f;
+    [Tooltip("Ignores a second hit on the same enemy within this many seconds (tiny bounces).")]
+    [SerializeField] private float damageCooldown = 0.1f;
     [SerializeField] private float minimumDamageSpeed = 0.05f;
 
     private PieceLauncher launcher;
@@ -26,14 +27,9 @@ public class PieceCombat : MonoBehaviour
         lastDamageTimes.Clear();
     }
 
+    // Only the moment of impact deals damage. (OnCollisionStay2D used to run
+    // every physics step while two pieces touched, stacking damage on a push.)
     private void OnCollisionEnter2D(
-        Collision2D collision
-    )
-    {
-        ProcessCollision(collision);
-    }
-
-    private void OnCollisionStay2D(
         Collision2D collision
     )
     {

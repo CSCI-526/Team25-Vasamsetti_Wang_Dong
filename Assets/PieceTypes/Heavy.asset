@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Heavy
   m_EditorClassIdentifier:
   type: 0
-  maxHP: 4
+  maxHP: 6
   attack: 1
   mass: 2
   launchForceMultiplier: 0.8

@@ -265,14 +265,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1476669847587361489, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
+      propertyPath: typeDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 6e7f8091a2b3c4d5e6f708192a3b4c5d, type: 2}
     - target: {fileID: 6041306706797630330, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
       propertyPath: m_Name
       value: red piece_3
       objectReference: {fileID: 0}
-    - target: {fileID: 1476669847587361489, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
-      propertyPath: typeDefinition
-      value:
-      objectReference: {fileID: 11400000, guid: 6e7f8091a2b3c4d5e6f708192a3b4c5d, type: 2}
     - target: {fileID: 8425071415727278264, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6
@@ -416,14 +416,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2206865212525779714, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
+      propertyPath: typeDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 4c5d6e7f8091a2b3c4d5e6f708192a3b, type: 2}
     - target: {fileID: 5679361070880685025, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
       propertyPath: m_Name
       value: blue piece_1
       objectReference: {fileID: 0}
-    - target: {fileID: 2206865212525779714, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
-      propertyPath: typeDefinition
-      value:
-      objectReference: {fileID: 11400000, guid: 4c5d6e7f8091a2b3c4d5e6f708192a3b, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -762,14 +762,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1476669847587361489, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
+      propertyPath: typeDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 5d6e7f8091a2b3c4d5e6f708192a3b4c, type: 2}
     - target: {fileID: 6041306706797630330, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
       propertyPath: m_Name
       value: red piece_2
       objectReference: {fileID: 0}
-    - target: {fileID: 1476669847587361489, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
-      propertyPath: typeDefinition
-      value:
-      objectReference: {fileID: 11400000, guid: 5d6e7f8091a2b3c4d5e6f708192a3b4c, type: 2}
     - target: {fileID: 8425071415727278264, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6
@@ -1311,6 +1311,7 @@ GameObject:
   - component: {fileID: 1167517479}
   - component: {fileID: 1167517478}
   - component: {fileID: 1167517482}
+  - component: {fileID: 1167517483}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -1318,21 +1319,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1167517482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1167517477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa833d98584544a3b721fba360c876bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ScoreDashboard
-  scoreManager: {fileID: 0}
-  turnManager: {fileID: 0}
-  winManager: {fileID: 0}
 --- !u!114 &1167517478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1417,6 +1403,60 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1167517482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167517477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa833d98584544a3b721fba360c876bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScoreDashboard
+  scoreManager: {fileID: 0}
+  turnManager: {fileID: 0}
+  winManager: {fileID: 0}
+  panelSize: {x: 300, y: 56}
+  topMargin: 10
+  labelFontSize: 18
+  scoreFontSize: 34
+  winFontSize: 64
+  timerPieSize: 26
+  lowTimeWarning: 2
+  panelColor: {r: 0.1, g: 0.1, b: 0.12, a: 0.85}
+  blueColor: {r: 0.25, g: 0.65, b: 1, a: 1}
+  redColor: {r: 1, g: 0.35, b: 0.35, a: 1}
+  inactiveLabelColor: {r: 1, g: 1, b: 1, a: 0.45}
+  timerWarningColor: {r: 1, g: 0.8, b: 0.2, a: 1}
+  winOverlayColor: {r: 0, g: 0, b: 0, a: 0.6}
+--- !u!114 &1167517483
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1167517477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe42270ee3e0f1b4ea1d20c806ee4e34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AbilitySelectionScreen
+  uniqueAbilitiesPerTeam: 1
+  panelSize: {x: 780, y: 500}
+  rowHeight: 96
+  titleFontSize: 30
+  headerFontSize: 22
+  nameFontSize: 20
+  smallFontSize: 13
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.7}
+  panelColor: {r: 0.12, g: 0.12, b: 0.14, a: 0.97}
+  rowColor: {r: 1, g: 1, b: 1, a: 0.06}
+  buttonColor: {r: 1, g: 1, b: 1, a: 0.15}
+  startButtonColor: {r: 0.2, g: 0.7, b: 0.35, a: 1}
+  blueColor: {r: 0.25, g: 0.65, b: 1, a: 1}
+  redColor: {r: 1, g: 0.35, b: 0.35, a: 1}
 --- !u!1 &1191540578
 GameObject:
   m_ObjectHideFlags: 0
@@ -1603,14 +1643,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2206865212525779714, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
+      propertyPath: typeDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 6e7f8091a2b3c4d5e6f708192a3b4c5d, type: 2}
     - target: {fileID: 5679361070880685025, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
       propertyPath: m_Name
       value: blue piece_3
       objectReference: {fileID: 0}
-    - target: {fileID: 2206865212525779714, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
-      propertyPath: typeDefinition
-      value:
-      objectReference: {fileID: 11400000, guid: 6e7f8091a2b3c4d5e6f708192a3b4c5d, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1667,14 +1707,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2206865212525779714, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
+      propertyPath: typeDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 5d6e7f8091a2b3c4d5e6f708192a3b4c, type: 2}
     - target: {fileID: 5679361070880685025, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
       propertyPath: m_Name
       value: blue piece_2
       objectReference: {fileID: 0}
-    - target: {fileID: 2206865212525779714, guid: 2a759ff57c887a44aaeedfd6723bd946, type: 3}
-      propertyPath: typeDefinition
-      value:
-      objectReference: {fileID: 11400000, guid: 5d6e7f8091a2b3c4d5e6f708192a3b4c, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1820,6 +1860,120 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1870033665}
   m_CullTransparentMesh: 1
+--- !u!1 &1928374650
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1928374652}
+  - component: {fileID: 1928374651}
+  - component: {fileID: 1928374653}
+  m_Layer: 0
+  m_Name: MatchWinManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1928374651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928374650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b4c5d6e7f8091a2b3c4d5e6f7081920, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  turnManager: {fileID: 1959607589}
+--- !u!4 &1928374652
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928374650}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1928374653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928374650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b544fca4d9344c89eab30f928866ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnderdogBuffManager
+  attackPerFallenTeammate: 1
+  doubleLastSurvivor: 1
+--- !u!1 &1928374660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1928374661}
+  - component: {fileID: 1928374662}
+  m_Layer: 0
+  m_Name: TreasureManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1928374661
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928374660}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1928374662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1928374660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7bd065b82df422e829061a1bcbf4982, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TreasureManager
+  spawnChance: 0.3
+  turnsToStay: 2
+  edgeMargin: 1.2
+  clearRadius: 1.6
+  maxSpawnAttempts: 30
+  healPercent: 0.5
+  minHeal: 1
+  treasureRadius: 0.4
+  blueTreasureColor: {r: 0.45, g: 0.75, b: 1, a: 1}
+  redTreasureColor: {r: 1, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &1959607588
 GameObject:
   m_ObjectHideFlags: 0
@@ -1852,6 +2006,7 @@ MonoBehaviour:
   currentTeam: 0
   stopDetector: {fileID: 273731293}
   turnText: {fileID: 357351508}
+  turnTimeLimit: 6
 --- !u!4 &1959607590
 Transform:
   m_ObjectHideFlags: 0
@@ -1875,14 +2030,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1476669847587361489, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
+      propertyPath: typeDefinition
+      value: 
+      objectReference: {fileID: 11400000, guid: 4c5d6e7f8091a2b3c4d5e6f708192a3b, type: 2}
     - target: {fileID: 6041306706797630330, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
       propertyPath: m_Name
       value: red piece_1
       objectReference: {fileID: 0}
-    - target: {fileID: 1476669847587361489, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
-      propertyPath: typeDefinition
-      value:
-      objectReference: {fileID: 11400000, guid: 4c5d6e7f8091a2b3c4d5e6f708192a3b, type: 2}
     - target: {fileID: 8425071415727278264, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4
@@ -1931,110 +2086,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: 56e983109e603c64290efcd7c7b0f942, type: 3}
---- !u!114 &1928374653
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928374650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b544fca4d9344c89eab30f928866ec4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UnderdogBuffManager
-  attackPerFallenTeammate: 1
-  doubleLastSurvivor: 1
---- !u!1 &1928374650
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1928374652}
-  - component: {fileID: 1928374651}
-  - component: {fileID: 1928374653}
-  m_Layer: 0
-  m_Name: MatchWinManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1928374651
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928374650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b4c5d6e7f8091a2b3c4d5e6f7081920, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  turnManager: {fileID: 1959607589}
---- !u!4 &1928374652
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928374650}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1928374660
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1928374661}
-  - component: {fileID: 1928374662}
-  m_Layer: 0
-  m_Name: TreasureManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1928374661
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928374660}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1928374662
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1928374660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7bd065b82df422e829061a1bcbf4982, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TreasureManager
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

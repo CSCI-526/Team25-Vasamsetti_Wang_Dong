@@ -1,33 +1,47 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Comeback treasure: a healing pickup that only helps the team that is behind.
-///  - "Behind" = fewer living pieces; with equal pieces, less total HP.
-///    If both teams are exactly even, no treasure appears.
-///  - At the start of the losing team's turn there is a spawnChance of a treasure
-///    appearing (only one at a time, never on top of a piece or against a wall).
-///    It is tinted in that team's color.
-///  - Only pieces of that team can collect it; enemy pieces pass straight through.
-///    The first injured piece to touch it heals healPercent of its starting HP
-///    (rounded up, at least minHeal), never above its starting HP.
-///  - It lasts for turnsToStay of the owner's turns (counting the one it spawned on),
-///    and vanishes early if the owner is no longer behind.
+/// Healing treasures. Every treasure belongs to one team and is tinted in its color.
+///  - Only pieces of the owner team can heal from it. Touching it always uses it up:
+///    the collector heals healPercent of its starting HP (rounded up, at least
+///    minHeal), never above its starting HP. A full-HP collector passes the heal
+///    to its most injured teammate.
+///  - An enemy piece that touches it knocks it away: it disappears, nobody heals.
+///  - It lasts turnsToStay turns in total (default 2 = one turn for each team).
+///
+/// Two sources of treasure:
+///  1. Opening treasures (second-player compensation): when the match starts,
+///     openingTreasureCount treasures appear on the second team's half of the board.
+///     The first team gets one turn to knock them away, then the second team gets
+///     one turn to use them.
+///  2. Comeback treasure: at the start of the losing team's turn there is a
+///     spawnChance of one appearing, if that team has an injured piece and no
+///     other treasure is on the board. "Losing" = fewer living pieces; with equal
+///     pieces, less total HP. It vanishes early if the owner is no longer behind
+///     or nobody on the team is injured.
 /// </summary>
 public class TreasureManager : MonoBehaviour
 {
-    [Header("Spawning")]
+    [Header("Opening Treasures (second team)")]
+    [Tooltip("Treasures given to the team that moves second, placed on its half at match start.")]
+    [SerializeField] [Min(0)] private int openingTreasureCount = 2;
+
+    [Header("Comeback Treasure")]
     [Tooltip("Chance per losing-team turn that a treasure appears.")]
     [SerializeField] [Range(0f, 1f)] private float spawnChance = 0.5f;
-    [Tooltip("How many of the owner team's turns the treasure stays for.")]
+
+    [Header("Spawning")]
+    [Tooltip("Turns a treasure stays for, counting both teams (2 = one try each).")]
     [SerializeField] [Min(1)] private int turnsToStay = 2;
-    [Tooltip("Distance from the camera edge the treasure must keep.")]
+    [Tooltip("Distance from the camera edge a treasure must keep.")]
     [SerializeField] private float edgeMargin = 1.2f;
-    [Tooltip("No collider (piece or wall) may be inside this radius when spawning.")]
+    [Tooltip("No collider (piece, wall or treasure) may be inside this radius when spawning.")]
     [SerializeField] private float clearRadius = 1.6f;
     [SerializeField] private int maxSpawnAttempts = 30;
 
     [Header("Reward")]
-    [Tooltip("Share of the collector's starting HP that is healed (0.5 = Heavy 2, Striker 2, Speed 1).")]
+    [Tooltip("Share of the collector's starting HP that is healed (0.5 = Heavy 3, Striker 3, Speed 2).")]
     [SerializeField] [Range(0f, 1f)] private float healPercent = 0.5f;
     [SerializeField] [Min(1)] private int minHeal = 1;
 
@@ -36,16 +50,23 @@ public class TreasureManager : MonoBehaviour
     [SerializeField] private Color blueTreasureColor = new Color(0.45f, 0.75f, 1f);
     [SerializeField] private Color redTreasureColor = new Color(1f, 0.5f, 0.5f);
 
+    private class ActiveTreasure
+    {
+        public Treasure Treasure;
+        public PieceTeamSide Owner;
+        public int TurnsLeft;
+        public bool IsOpening;  // opening treasures are not removed early
+    }
+
+    private readonly List<ActiveTreasure> treasures = new List<ActiveTreasure>();
+
     private TurnManager turnManager;
     private MatchWinManager winManager;
     private PieceStats[] pieces;
 
-    private Treasure activeTreasure;
-    private PieceTeamSide ownerTeam;
-    private int turnsLeft;
-
     // Extra actions re-announce the same turn; only count real new turns.
     private int lastTurnSequence = -1;
+    private bool openingSpawned;
 
     private void Start()
     {
@@ -94,48 +115,80 @@ public class TreasureManager : MonoBehaviour
 
         lastTurnSequence = turnManager.TurnSequence;
 
-        bool hasLosingTeam = TryGetLosingTeam(out PieceTeamSide losingTeam);
-
-        if (activeTreasure != null)
+        // First turn of the match: the team that is NOT moving now moves second.
+        if (turnManager.TurnSequence == 1 && !openingSpawned)
         {
-            // The owner caught up: the comeback help is no longer needed.
-            if (!hasLosingTeam || losingTeam != ownerTeam)
-            {
-                Debug.Log($"Treasure: {ownerTeam} is no longer behind, treasure removed.");
-                Despawn();
-                return;
-            }
-
-            // Count down only on the owner's own turns.
-            if (team != ownerTeam)
-            {
-                return;
-            }
-
-            turnsLeft--;
-
-            if (turnsLeft <= 0)
-            {
-                Despawn();
-            }
-            else
-            {
-                activeTreasure.SetLastTurn(turnsLeft == 1);
-            }
-
+            openingSpawned = true;
+            SpawnOpeningTreasures(Opponent(team));
             return;
         }
 
-        // Only spawn at the start of the losing team's turn.
-        if (!hasLosingTeam || team != losingTeam)
+        bool hasLosingTeam = TryGetLosingTeam(out PieceTeamSide losingTeam);
+
+        AgeTreasures(hasLosingTeam, losingTeam);
+
+        // Comeback treasure: one at a time, only when the board is empty.
+        if (treasures.Count > 0)
+        {
+            return;
+        }
+
+        // Only spawn at the start of the losing team's turn,
+        // and only if one of its pieces can actually use the heal.
+        if (!hasLosingTeam || team != losingTeam ||
+            FindMostInjured(losingTeam) == null)
         {
             return;
         }
 
         if (Random.value < spawnChance)
         {
-            TrySpawn(losingTeam);
+            TrySpawn(losingTeam, false, false);
         }
+    }
+
+    // Counts down every treasure by one turn and removes the ones that expired.
+    private void AgeTreasures(bool hasLosingTeam, PieceTeamSide losingTeam)
+    {
+        for (int i = treasures.Count - 1; i >= 0; i--)
+        {
+            ActiveTreasure entry = treasures[i];
+
+            // A comeback treasure is removed once its owner caught up
+            // or has nobody left to heal.
+            if (!entry.IsOpening &&
+                (!hasLosingTeam || losingTeam != entry.Owner ||
+                 FindMostInjured(entry.Owner) == null))
+            {
+                Debug.Log($"Treasure: {entry.Owner} no longer needs it, treasure removed.");
+                Remove(entry);
+                continue;
+            }
+
+            entry.TurnsLeft--;
+
+            if (entry.TurnsLeft <= 0)
+            {
+                Remove(entry);
+            }
+            else
+            {
+                entry.Treasure.SetLastTurn(entry.TurnsLeft == 1);
+            }
+        }
+    }
+
+    private void SpawnOpeningTreasures(PieceTeamSide owner)
+    {
+        for (int i = 0; i < openingTreasureCount; i++)
+        {
+            TrySpawn(owner, true, true);
+        }
+    }
+
+    private static PieceTeamSide Opponent(PieceTeamSide team)
+    {
+        return team == PieceTeamSide.Blue ? PieceTeamSide.Red : PieceTeamSide.Blue;
     }
 
     // Fewer living pieces loses; with equal pieces, less total HP loses.
@@ -182,20 +235,21 @@ public class TreasureManager : MonoBehaviour
 
     private void HandleMatchOver(PieceTeamSide winner)
     {
-        Despawn();
+        RemoveAll();
     }
 
     private void HandleMatchReset()
     {
-        Despawn();
+        RemoveAll();
         lastTurnSequence = -1;
+        openingSpawned = false;
     }
 
-    private void TrySpawn(PieceTeamSide owner)
+    private void TrySpawn(PieceTeamSide owner, bool onOwnerHalf, bool isOpening)
     {
-        if (!TryFindSpawnPosition(out Vector2 position))
+        if (!TryFindSpawnPosition(owner, onOwnerHalf, out Vector2 position))
         {
-            Debug.Log("Treasure: no free spot found this turn.");
+            Debug.Log("Treasure: no free spot found.");
             return;
         }
 
@@ -210,22 +264,30 @@ public class TreasureManager : MonoBehaviour
             }
         }
 
-        GameObject go = new GameObject("Treasure");
+        GameObject go = new GameObject(isOpening ? "OpeningTreasure" : "Treasure");
         go.transform.position = position;
 
         Color color = owner == PieceTeamSide.Blue ? blueTreasureColor : redTreasureColor;
 
-        activeTreasure = go.AddComponent<Treasure>();
-        activeTreasure.Init(this, treasureRadius, color, pieceRenderer);
+        Treasure treasure = go.AddComponent<Treasure>();
+        treasure.Init(this, treasureRadius, color, pieceRenderer);
 
-        ownerTeam = owner;
-        turnsLeft = turnsToStay;
-        activeTreasure.SetLastTurn(turnsLeft == 1);
+        ActiveTreasure entry = new ActiveTreasure
+        {
+            Treasure = treasure,
+            Owner = owner,
+            TurnsLeft = turnsToStay,
+            IsOpening = isOpening
+        };
 
-        Debug.Log($"Treasure spawned for {owner} at {position} for {turnsToStay} of their turns.");
+        treasure.SetLastTurn(entry.TurnsLeft == 1);
+        treasures.Add(entry);
+
+        Debug.Log($"Treasure spawned for {owner} at {position} for {turnsToStay} turns.");
     }
 
-    private bool TryFindSpawnPosition(out Vector2 position)
+    // onOwnerHalf: keep to the side of the board where the owner's pieces are.
+    private bool TryFindSpawnPosition(PieceTeamSide owner, bool onOwnerHalf, out Vector2 position)
     {
         position = Vector2.zero;
 
@@ -239,15 +301,31 @@ public class TreasureManager : MonoBehaviour
         float halfWidth = cam.orthographicSize * cam.aspect - edgeMargin;
         Vector2 center = cam.transform.position;
 
+        float minX = -halfWidth;
+        float maxX = halfWidth;
+
+        if (onOwnerHalf)
+        {
+            if (OwnerSideSign(owner, center.x) > 0f)
+            {
+                minX = edgeMargin;
+            }
+            else
+            {
+                maxX = -edgeMargin;
+            }
+        }
+
         for (int i = 0; i < maxSpawnAttempts; i++)
         {
             Vector2 candidate = center + new Vector2(
-                Random.Range(-halfWidth, halfWidth),
+                Random.Range(minX, maxX),
                 Random.Range(-halfHeight, halfHeight)
             );
 
-            // Nothing (pieces, walls) nearby = a fair spot nobody gets for free.
-            if (Physics2D.OverlapCircle(candidate, clearRadius) == null)
+            // Nothing (pieces, walls, other treasures) nearby.
+            if (Physics2D.OverlapCircle(candidate, clearRadius) == null &&
+                !IsNearTreasure(candidate))
             {
                 position = candidate;
                 return true;
@@ -257,49 +335,144 @@ public class TreasureManager : MonoBehaviour
         return false;
     }
 
+    // +1 if the owner's living pieces sit right of the board center, -1 if left.
+    private float OwnerSideSign(PieceTeamSide owner, float centerX)
+    {
+        float sum = 0f;
+        int count = 0;
+
+        foreach (PieceStats piece in pieces)
+        {
+            if (piece == null || piece.IsDead || piece.Team != owner)
+            {
+                continue;
+            }
+
+            sum += piece.transform.position.x;
+            count++;
+        }
+
+        if (count == 0)
+        {
+            return 1f;
+        }
+
+        return sum / count >= centerX ? 1f : -1f;
+    }
+
+    // Backup for OverlapCircle: a treasure made this frame may not be in the physics scene yet.
+    private bool IsNearTreasure(Vector2 candidate)
+    {
+        foreach (ActiveTreasure entry in treasures)
+        {
+            Vector2 other = entry.Treasure.transform.position;
+
+            if (Vector2.Distance(candidate, other) < clearRadius)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // Called by Treasure when a piece passes over it.
-    // Returns false if the piece did not take it (enemy piece, or already at full HP).
+    // Returns true when the treasure is used up (healed or knocked away).
     public bool TryCollect(Treasure treasure, PieceStats collector)
     {
-        if (treasure != activeTreasure || collector == null || collector.IsDead)
+        ActiveTreasure entry = treasures.Find(t => t.Treasure == treasure);
+
+        if (entry == null || collector == null || collector.IsDead)
         {
             return false;
         }
 
-        // Only the team that is behind may use it.
-        if (collector.Team != ownerTeam)
+        // The other team can only knock it away, not heal from it.
+        if (collector.Team != entry.Owner)
         {
-            return false;
+            FloatingText.Spawn(
+                treasure.transform.position + Vector3.up * 0.6f,
+                "DENIED",
+                new Color(0.8f, 0.8f, 0.8f)
+            );
+
+            Debug.Log($"{collector.name} knocked away a {entry.Owner} treasure.");
+
+            Remove(entry);
+            return true;
         }
 
-        // Heal up to the starting HP, never beyond it.
-        int missing = collector.BaseHealth - collector.CurrentHealth;
+        // Any owner piece picks it up. If the collector is at full HP,
+        // the most injured teammate gets the heal instead.
+        PieceStats target = IsInjured(collector)
+            ? collector
+            : FindMostInjured(entry.Owner);
 
-        if (missing <= 0)
+        if (target != null)
         {
-            return false;
+            int heal = Mathf.Max(minHeal, Mathf.CeilToInt(target.BaseHealth * healPercent));
+
+            // Heal caps at the starting HP; PieceStatsDisplay pops up "HP +2".
+            target.Heal(heal);
+
+            Debug.Log($"{collector.name} collected a {entry.Owner} treasure. {target.name} was healed.");
+        }
+        else
+        {
+            Debug.Log($"{collector.name} collected a {entry.Owner} treasure, but nobody needed healing.");
         }
 
-        int heal = Mathf.Max(minHeal, Mathf.CeilToInt(collector.BaseHealth * healPercent));
-        int amount = Mathf.Min(heal, missing);
-
-        // PieceStatsDisplay pops up "HP +2" for this.
-        collector.Heal(amount);
-
-        Debug.Log($"{collector.name} collected the {ownerTeam} treasure and healed {amount} HP.");
-
-        Despawn();
+        Remove(entry);
         return true;
     }
 
-    private void Despawn()
+    private static bool IsInjured(PieceStats piece)
     {
-        if (activeTreasure != null)
+        return piece != null &&
+               !piece.IsDead &&
+               piece.CurrentHealth < piece.BaseHealth;
+    }
+
+    // Living piece of this team missing the most HP, or null if nobody is hurt.
+    private PieceStats FindMostInjured(PieceTeamSide team)
+    {
+        PieceStats best = null;
+        int bestMissing = 0;
+
+        foreach (PieceStats piece in pieces)
         {
-            Destroy(activeTreasure.gameObject);
+            if (!IsInjured(piece) || piece.Team != team)
+            {
+                continue;
+            }
+
+            int missing = piece.BaseHealth - piece.CurrentHealth;
+
+            if (missing > bestMissing)
+            {
+                best = piece;
+                bestMissing = missing;
+            }
         }
 
-        activeTreasure = null;
-        turnsLeft = 0;
+        return best;
+    }
+
+    private void Remove(ActiveTreasure entry)
+    {
+        if (entry.Treasure != null)
+        {
+            Destroy(entry.Treasure.gameObject);
+        }
+
+        treasures.Remove(entry);
+    }
+
+    private void RemoveAll()
+    {
+        for (int i = treasures.Count - 1; i >= 0; i--)
+        {
+            Remove(treasures[i]);
+        }
     }
 }

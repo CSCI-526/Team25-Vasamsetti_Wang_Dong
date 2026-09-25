@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -8,8 +9,13 @@ public class ExtraActionOnKillAbility : MonoBehaviour
     private PieceStats pieceStats;
     private PieceAbility pieceAbility;
 
-    // 记录上一次触发技能时的回合编号
-    private int lastTriggeredTurnSequence = -1;
+    // 一局游戏只能触发一次；重开比赛时清除
+    private bool usedThisMatch;
+
+    public bool UsedThisMatch => usedThisMatch;
+
+    // Fired when the ability is used up or restored (PieceInfoLabel greys it out).
+    public event Action UsedChanged;
 
     private void Awake()
     {
@@ -22,6 +28,7 @@ public class ExtraActionOnKillAbility : MonoBehaviour
         if (pieceStats != null)
         {
             pieceStats.KilledEnemy += HandleKilledEnemy;
+            pieceStats.StatsReset += HandleMatchReset;
         }
     }
 
@@ -30,7 +37,15 @@ public class ExtraActionOnKillAbility : MonoBehaviour
         if (pieceStats != null)
         {
             pieceStats.KilledEnemy -= HandleKilledEnemy;
+            pieceStats.StatsReset -= HandleMatchReset;
         }
+    }
+
+    // StatsReset fires when the match restarts (PieceStats.ResetToStart).
+    private void HandleMatchReset()
+    {
+        usedThisMatch = false;
+        UsedChanged?.Invoke();
     }
 
     private void HandleKilledEnemy(
@@ -77,26 +92,22 @@ public class ExtraActionOnKillAbility : MonoBehaviour
             return;
         }
 
-        int currentTurnSequence =
-            TurnManager.Instance.TurnSequence;
-
-        // 本回合已经触发过，不再重复触发
-        if (lastTriggeredTurnSequence ==
-            currentTurnSequence)
+        // 这一局已经触发过，不再重复触发
+        if (usedThisMatch)
         {
             return;
         }
 
-        lastTriggeredTurnSequence =
-            currentTurnSequence;
+        usedThisMatch = true;
+        UsedChanged?.Invoke();
 
         TurnManager.Instance.GrantExtraAction(
             pieceStats.Team
         );
 
         Debug.Log(
-            $"{name} earned an extra action " +
-            $"on turn {currentTurnSequence}."
+            $"{name} earned its one extra action " +
+            $"of the match on turn {TurnManager.Instance.TurnSequence}."
         );
     }
 }

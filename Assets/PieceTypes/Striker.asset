@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Striker
   m_EditorClassIdentifier:
   type: 1
-  maxHP: 3
+  maxHP: 5
   attack: 2
   mass: 1
   launchForceMultiplier: 1

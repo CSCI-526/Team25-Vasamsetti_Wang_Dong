@@ -17,6 +17,7 @@ public class PieceStatsDisplay : MonoBehaviour
     [SerializeField] private Color hpLossColor = new Color(1f, 0.35f, 0.3f);
     [SerializeField] private Color atkGainColor = new Color(1f, 0.8f, 0.2f);
     [SerializeField] private Color atkLossColor = new Color(0.7f, 0.7f, 0.7f);
+    [SerializeField] private Color healBlockedColor = new Color(0.75f, 0.75f, 0.75f);
 
     // Values the last popup was based on (ahead of what the text shows).
     private int knownHealth;
@@ -52,6 +53,7 @@ public class PieceStatsDisplay : MonoBehaviour
         {
             stats.StatsChanged += HandleStatsChanged;
             stats.StatsReset += SnapToCurrent;
+            stats.HealBlocked += HandleHealBlocked;
         }
     }
 
@@ -66,7 +68,18 @@ public class PieceStatsDisplay : MonoBehaviour
         {
             stats.StatsChanged -= HandleStatsChanged;
             stats.StatsReset -= SnapToCurrent;
+            stats.HealBlocked -= HandleHealBlocked;
         }
+    }
+
+    // A heal hit a piece that was already at full HP.
+    private void HandleHealBlocked()
+    {
+        FloatingText.Spawn(
+            stats.transform.position + Vector3.up * popupHeight,
+            "FULL HP",
+            healBlockedColor
+        );
     }
 
     private void HandleStatsChanged()
@@ -179,7 +192,7 @@ public class PieceStatsDisplay : MonoBehaviour
         }
 
         statsText.text =
-            $"HP {stats.CurrentHealth}\n" +
+            $"HP {stats.CurrentHealth}/{stats.BaseHealth}\n" +
             $"ATK {stats.AttackPower}";
     }
 }

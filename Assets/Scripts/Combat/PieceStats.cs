@@ -45,6 +45,9 @@ public class PieceStats : MonoBehaviour
     public int AttackPower => currentAttackPower;
     public bool IsDead => isDead;
 
+    // Null when this piece has no type config assigned.
+    public PieceTypeDefinition TypeDefinition => typeDefinition;
+
     public PieceTeamSide Team
     {
         get
@@ -72,6 +75,9 @@ public class PieceStats : MonoBehaviour
     public event Action<PieceStats> KilledEnemy;
     public event Action<PieceStats, int> Damaged;
 
+    // Fired when a heal did nothing because the piece is already at full HP.
+    public event Action HealBlocked;
+
 
     private void Awake()
     {
@@ -90,6 +96,15 @@ public class PieceStats : MonoBehaviour
         ApplyTypeDefinition();
 
         ResetRuntimeStats();
+    }
+
+    private void Start()
+    {
+        // Type / ability label under the piece, so players can tell pieces apart.
+        if (GetComponent<PieceInfoLabel>() == null)
+        {
+            gameObject.AddComponent<PieceInfoLabel>();
+        }
     }
 
     // Pulls base stats, mass and launch force from the assigned type config.
@@ -158,10 +173,25 @@ public class PieceStats : MonoBehaviour
         }
     }
 
-    public void Heal(int amount)
+    // Heals up to the starting HP, never beyond it.
+    // reportIfFull: fire HealBlocked when the piece is already at full HP,
+    // so the display can show "FULL HP" instead of silently doing nothing.
+    public void Heal(int amount, bool reportIfFull = true)
     {
         if (isDead || amount <= 0)
         {
+            return;
+        }
+
+        amount = Mathf.Min(amount, baseHealth - currentHealth);
+
+        if (amount <= 0)
+        {
+            if (reportIfFull)
+            {
+                HealBlocked?.Invoke();
+            }
+
             return;
         }
 
