@@ -1,0 +1,36 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Build folders
+[Bb]uild/
+[Bb]uilds/
+
+# IDE generated files
+.vs/
+.idea/
+.gradle/
+ExportedObj/
+
+# Visual Studio files
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity crash reports and captures
+sysinfo.txt
+MemoryCaptures/
+Recordings/
