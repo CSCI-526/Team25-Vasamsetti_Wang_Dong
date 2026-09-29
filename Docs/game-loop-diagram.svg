@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" font-family="Segoe Print, Comic Sans MS, cursive">
+  <rect width="900" height="520" fill="#fdfdf8"/>
+  <g fill="none" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- boxes -->
+    <path d="M62,62 L238,58 L241,121 L59,118 Z"/>
+    <path d="M332,60 L571,63 L568,122 L329,119 Z"/>
+    <path d="M662,58 L842,62 L839,119 L660,122 Z"/>
+    <path d="M641,232 L862,228 L860,338 L644,341 Z"/>
+    <path d="M450,225 L578,272 L450,322 L322,271 Z"/>
+    <path d="M62,242 L239,239 L242,301 L60,299 Z"/>
+    <path d="M392,412 L509,409 L512,462 L389,465 Z"/>
+
+    <!-- arrows -->
+    <path d="M242,90 Q285,86 326,91"/><path d="M314,83 L327,91 L315,99"/>
+    <path d="M571,92 Q615,95 656,90"/><path d="M644,82 L657,90 L645,98"/>
+    <path d="M752,122 Q748,175 751,224"/><path d="M743,212 L751,225 L759,212"/>
+    <path d="M640,285 Q610,280 582,274"/><path d="M594,266 L581,274 L593,283"/>
+    <path d="M450,323 Q453,365 450,405"/><path d="M442,393 L450,406 L458,393"/>
+    <path d="M321,271 Q285,268 246,271"/><path d="M258,263 L245,271 L258,279"/>
+    <path d="M150,238 Q148,195 152,170 Q300,166 448,170 L449,127"/><path d="M441,138 L449,125 L457,138"/>
+  </g>
+
+  <g fill="#222" font-size="16" text-anchor="middle">
+    <text x="450" y="36" font-size="22">Game Loop (sketch)</text>
+
+    <text x="150" y="85">pick abilities</text>
+    <text x="150" y="106" font-size="13">(1 per piece)</text>
+
+    <text x="450" y="87">Blue / Red turn</text>
+    <text x="450" y="108" font-size="13">6 sec to shoot</text>
+
+    <text x="751" y="85">drag &amp; shoot</text>
+    <text x="751" y="106" font-size="13">(slingshot)</text>
+
+    <text x="751" y="258">pieces bump!</text>
+    <text x="751" y="282" font-size="13">hit enemy → -HP</text>
+    <text x="751" y="302" font-size="13">hit friend → heal / +ATK</text>
+    <text x="751" y="322" font-size="13">treasure → +HP</text>
+
+    <text x="450" y="268" font-size="14">a team all</text>
+    <text x="450" y="287" font-size="14">dead?</text>
+
+    <text x="150" y="276">switch team</text>
+
+    <text x="450" y="444" font-size="18">WIN!</text>
+
+    <text x="470" y="370" font-size="13">yes</text>
+    <text x="285" y="262" font-size="13">no</text>
+    <text x="300" y="160" font-size="13">next turn</text>
+    <text x="770" y="180" font-size="13" text-anchor="start">wait till</text>
+    <text x="770" y="198" font-size="13" text-anchor="start">all stop</text>
+    <text x="465" y="150" font-size="12" fill="#555" text-anchor="start">(too slow = lose turn)</text>
+  </g>
+</svg>
