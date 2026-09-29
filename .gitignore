@@ -6,8 +6,8 @@
 [Uu]ser[Ss]ettings/
 
 # Build folders
-[Bb]uild/
-[Bb]uilds/
+/[Bb]uild/
+/[Bb]uilds/
 
 # IDE generated files
 .vs/
